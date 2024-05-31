@@ -1,0 +1,14 @@
+body{
+    background-image: url(../images/fond.jpg);
+    background-size: cover;
+    background-attachment: fixed;
+}
+
+#carouselSize>div{
+    background-size: cover;
+}
+
+.mainIndex>img{
+    width: 400px; 
+    height:400px;
+}
