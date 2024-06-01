@@ -62,7 +62,8 @@
         echo $resultQR->getString();
 
         // Save the image to a file
-        $resultQR->saveToFile("qr-code3.png");
+        $resultQR->saveToFile("qr-code4.png");
+        
         ?>
     </header>
 

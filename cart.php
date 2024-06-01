@@ -20,6 +20,7 @@
         include_once __DIR__. '/templates/header.php';
         require_once 'lib/offers.php';
         require_once "lib/pdo.php";
+        require_once "lib/user.php";
         ?>
     </header>
 

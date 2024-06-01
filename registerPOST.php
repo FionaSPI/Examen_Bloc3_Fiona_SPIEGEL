@@ -1,12 +1,7 @@
 <?php
-
-$dsn = 'mysql:host=localhost;dbname=bddJo';
-$username = 'root';
-$password = '';
-
-try{
-    $pdo = new PDO($dsn, $username, $password);
-    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+require_once __DIR__ . 'lib/pdo.php';
+require_once __DIR__ . '/lib/user.php';
+require_once __DIR__ . '/lib/session.php';
 
     //Récupérer les données du formulaire d’inscription 
     $nameForm = $_POST['name'];
@@ -30,7 +25,7 @@ try{
     $hashedPassword = password_hash($passwordForm, PASSWORD_DEFAULT);
 
     //Insérer les données dans la base 
-    $insertQuery = "INSERT INTO users ( name, surname, email, tel_num_users, password) VALUES (:name, :surname, :email, :tel_num_users, :password)";
+    $insertQuery = "INSERT INTO users ( name, surname, email, tel_user, password) VALUES (:name, :surname, :email, :tel_num_users, :password)";
     $stmt = $pdo->prepare($insertQuery);
     $stmt->bindParam(':name', $nameForm);
     $stmt->bindParam(':surname', $surnameForm);
@@ -38,13 +33,8 @@ try{
     $stmt->bindParam(':tel_num_users', $telForm);
     $stmt->bindParam(':password', $hashedPassword);
     $stmt->execute();
+    session_start();
 
     header("Location: tickets.php");
-    exit;
-
-}
-catch (PDOException $e){
-    echo "Erreur lors de l’inscription : ". $e->getMessage();
-}
 
 ?>

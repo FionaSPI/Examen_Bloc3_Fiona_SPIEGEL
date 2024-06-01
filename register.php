@@ -20,44 +20,101 @@
         include_once __DIR__. '/templates/header.php';
         require_once __DIR__ . '/lib/pdo.php';
         require_once __DIR__ . '/lib/user.php';
+
+        $errors = [];
+
+        if (isset($_POST['registerUser'])) {
+            $nameForm = $_POST['name'];
+            $surnameForm = $_POST['surname'];
+            $emailForm = $_POST['email'];
+            $telForm = $_POST['tel_num_users'];
+            $passwordForm = $_POST['password'];
+
+            //Vérifier l’unicité de l’adresse mail
+            $query = "SELECT * FROM users WHERE email = :email";
+            $stmt = $pdo->prepare($query);
+            $stmt->bindParam(':email', $emailForm);
+            $stmt->execute();
+
+            //Vérifier que l'email de l’utilisateur existe
+            if($stmt->rowCount() > 0){
+                die("Cette adresse email est déjà utilisée");
+            }
+
+            // Hashage(encryptage)
+            $hashedPassword = password_hash($passwordForm, PASSWORD_DEFAULT);
+
+            //Insérer les données dans la base 
+            $insertQuery = "INSERT INTO users ( name, surname, email, tel_user, password) VALUES (:name, :surname, :email, :tel_num_users, :password)";
+            $stmt = $pdo->prepare($insertQuery);
+            $stmt->bindParam(':name', $nameForm);
+            $stmt->bindParam(':surname', $surnameForm);
+            $stmt->bindParam(':email', $emailForm);
+            $stmt->bindParam(':tel_num_users', $telForm);
+            $stmt->bindParam(':password', $hashedPassword);
+            $stmt->execute();
+
+            
+            $user = verifyUserLoginPassword($pdo, $_POST['email'], $_POST['password']);
+
+            if ($user) {
+                // on va le connecter => session
+                $_SESSION['users'] = $user;
+                header("Location: tickets.php");
+            } else {
+                   // afficher une erreur
+                $errors[] = "Email ou mot de passe incorrect";
+            }
+        }
+        
+        
+        
+        
+        
         ?>
+
+
     </header>
 
     <!----------------------------------------------------- MAIN ----------------------------------------------------->
 
-    <main class="shadow w-75 mx-auto bg-light bg-opacity-50">
-        <h1 class="pt-5 d-flex justify-content-center">Insription</h1>
+    <main class="shadow row mx-auto bg-light bg-opacity-50">
+        <div class="col-sm-12 col-md-10 col-lg-8 mx-auto">
+            <div class="row">
+                <h1 class="pt-5 d-flex justify-content-center">Insription</h1>
 
-        <!--------------------------------------- FORMULAIRE D'INSCRIPTION --------------------------------------->
-        
-        <form action="registerPost.php" method="POST" class="w-50 mx-auto py-5">
-            <div class="mb-3">
-                <label for="name" class="form-label">Nom :</label>
-                <input type="text" name="name" rows="3" required class="form-control"> <br>
+                <!--------------------------------------- FORMULAIRE D'INSCRIPTION --------------------------------------->
+
+                <form action="" method="POST" class="col-sm-10 col-md-8 col-lg-8 mx-auto py-5">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Nom :</label>
+                        <input type="text" name="name" rows="3" required class="form-control"> <br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="surname" class="form-label">Prénom :</label>
+                        <input type="text" name="surname" rows="3" required class="form-control"> <br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Adresse email :</label>
+                        <input type="email" name="email" class="form-control" rows="3" required> <br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tel_num_users" class="form-label">Numéro de téléphone :</label>
+                        <input type="tel" name="tel_num_users" class="form-control" rows="3" required> <br>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mot de passe :</label>
+                        <input type="password" name="password" class="form-control" rows="3" required> <br>
+                    </div>
+                    <input class="btn btn-success" type="submit" name='registerUser' value="S'inscrire">
+
+                </form>
             </div>
-
-            <div class="mb-3">
-                <label for="surname" class="form-label">Prénom :</label>
-                <input type="text" name="surname" rows="3" required class="form-control"> <br>
-            </div>
-
-            <div class="mb-3">
-                <label for="email" class="form-label">Adresse email :</label>
-                <input type="email" name="email" class="form-control" rows="3" required> <br>
-            </div>
-
-            <div class="mb-3">
-                <label for="tel_num_users" class="form-label">Numéro de téléphone :</label>
-                <input type="tel" name="tel_num_users" class="form-control" rows="3" required> <br>
-            </div>
-
-            <div class="mb-3">
-                <label for="password" class="form-label">Mot de passe :</label>
-                <input type="password" name="password" class="form-control" rows="3" required> <br>
-            </div>
-            <input class="btn btn-success" type="submit" value="S'inscrire">
-
-        </form>
+        </div>
     </main>
 
     <!---------------------------------------------------- FOOTER ---------------------------------------------------->

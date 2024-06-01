@@ -30,7 +30,7 @@
             if ($user) {
                 // on va le connecter => session
                 $_SESSION['users'] = $user;
-                header('location: index.php');
+                header('location: tickets.php');
             } else {
                    // afficher une erreur
                 $errors[] = "Email ou mot de passe incorrect";
@@ -39,30 +39,35 @@
     </header>
     <!----------------------------------------------------- MAIN ----------------------------------------------------->
 
-    <main class="h-75 shadow w-75 mx-auto bg-light bg-opacity-50">
-        <h1 class="pt-5 d-flex justify-content-center">Connexion</h1>
+    <main class="h-75 shadow row mx-auto bg-light bg-opacity-50">
 
-        <!---------------------------------------- FORMULAIRE DE CONNEXION ---------------------------------------->
-        <?php
-        foreach ($errors as $error) { ?>
-        <div class="alert alert-danger" role="alert">
-            <?=$error; ?>
-        </div>
-        <?php }
-    ?>
+        <div class="col-sm-12 col-md-10 col-lg-8 mx-auto">
+            <div class="row">
 
-        <form action="" method="POST" class="w-50 mx-auto py-5">
-        <div class="mb-3">
-            <label for="email" class="form-label">Adresse email :</label>
-            <input type="email" name="email" id="email" class="form-control" require>
-        </div>
-        <div class="mb-3">
-            <label for="password" class="form-label">Mot de passe :</label>
-            <input type="password" name="password" id="password" class="form-control" require>
-        </div>
+                <h1 class="pt-5 d-flex justify-content-center">Connexion</h1>
 
-        <input type="submit" name="loginUser" value="Connexion" class="btn btn-info text-white">
-    </form>
+                <!---------------------------------------- FORMULAIRE DE CONNEXION ---------------------------------------->
+                <?php
+                foreach ($errors as $error) { ?>
+                <div class="alert alert-danger" role="alert">
+                    <?=$error; ?>
+                </div>
+                <?php }
+                ?>
+
+                <form action="" method="POST" class="col-sm-10 col-md-8 col-lg-8 mx-auto py-5">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Adresse email :</label>
+                        <input type="email" name="email" id="email" class="form-control" require>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Mot de passe :</label>
+                        <input type="password" name="password" id="password" class="form-control" require>
+                    </div>
+
+                    <input type="submit" name="loginUser" value="Connexion" class="btn btn-info text-white my-5">
+                </form>
+            </div>
 
     </main>
 
