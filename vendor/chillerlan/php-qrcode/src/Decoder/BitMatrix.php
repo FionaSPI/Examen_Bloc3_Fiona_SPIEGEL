@@ -80,7 +80,7 @@ final class BitMatrix extends QRMatrix{
 	/**
 	 * Resets the current version info in order to attempt another reading
 	 */
-	public function resetVersionInfo():self{
+	public function resetVersionInfo():static{
 		$this->version     = null;
 		$this->eccLevel    = null;
 		$this->maskPattern = null;
@@ -91,13 +91,12 @@ final class BitMatrix extends QRMatrix{
 	/**
 	 * Mirror the bit matrix diagonally in order to attempt a second reading.
 	 */
-	public function mirrorDiagonal():self{
+	public function mirrorDiagonal():static{
 		$this->mirror = !$this->mirror;
 
 		// mirror vertically
 		$this->matrix = array_reverse($this->matrix);
 		// rotate by 90 degrees clockwise
-		/** @phan-suppress-next-line PhanTypeMismatchReturnSuperType */
 		return $this->rotate90();
 	}
 
@@ -179,7 +178,7 @@ final class BitMatrix extends QRMatrix{
 	 *
 	 * @throws \chillerlan\QRCode\Decoder\QRCodeDecoderException
 	 */
-	private function readFormatInformation():self{
+	private function readFormatInformation():static{
 
 		if($this->eccLevel !== null && $this->maskPattern !== null){
 			return $this;
@@ -296,7 +295,7 @@ final class BitMatrix extends QRMatrix{
 	 * @throws \chillerlan\QRCode\Decoder\QRCodeDecoderException
 	 * @noinspection DuplicatedCode
 	 */
-	private function readVersion():self{
+	private function readVersion():static{
 
 		if($this->version !== null){
 			return $this;
@@ -415,7 +414,7 @@ final class BitMatrix extends QRMatrix{
 	 * @codeCoverageIgnore
 	 * @throws \chillerlan\QRCode\Data\QRCodeDataException
 	 */
-	public function setQuietZone(int $quietZoneSize = null):self{
+	public function setQuietZone(int $quietZoneSize = null):static{
 		throw new QRCodeDataException('not supported');
 	}
 
@@ -423,7 +422,7 @@ final class BitMatrix extends QRMatrix{
 	 * @codeCoverageIgnore
 	 * @throws \chillerlan\QRCode\Data\QRCodeDataException
 	 */
-	public function setLogoSpace(int $width, int $height = null, int $startX = null, int $startY = null):self{
+	public function setLogoSpace(int $width, int $height = null, int $startX = null, int $startY = null):static{
 		throw new QRCodeDataException('not supported');
 	}
 

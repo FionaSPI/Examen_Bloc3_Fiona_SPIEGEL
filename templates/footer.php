@@ -4,6 +4,7 @@
                 <li class="nav-item"><a href="index.php" class="nav-link px-2 text-body-secondary">Accueil</a></li>
                 <li class="nav-item"><a href="tickets.php" class="nav-link px-2 text-body-secondary">Offres tickets</a></li>
                 <li class="nav-item"><a href="register.php" class="nav-link px-2 text-body-secondary">S'inscrire</a></li>
+                <li class="nav-item"><a href="admin/loginAdmin.php" class="nav-link px-2 text-body-secondary">Administrateur</a></li>
             </ul>
             <p class="text-center text-body-secondary">© 2024 Jeux Olympiques Paris 2024</p>
         </footer>

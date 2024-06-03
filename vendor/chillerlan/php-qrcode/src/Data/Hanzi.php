@@ -95,7 +95,7 @@ final class Hanzi extends QRDataModeAbstract{
 		try{
 			$string = self::convertEncoding($string);
 		}
-		catch(Throwable $e){
+		catch(Throwable){
 			return false;
 		}
 
@@ -129,7 +129,7 @@ final class Hanzi extends QRDataModeAbstract{
 	 *
 	 * @throws \chillerlan\QRCode\Data\QRCodeDataException on an illegal character occurence
 	 */
-	public function write(BitBuffer $bitBuffer, int $versionNumber):QRDataModeInterface{
+	public function write(BitBuffer $bitBuffer, int $versionNumber):static{
 
 		$bitBuffer
 			->put(self::DATAMODE, 4)

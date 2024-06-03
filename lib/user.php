@@ -2,7 +2,7 @@
 
 try{
 
-    function verifyUserLoginPassword(PDO $pdo, string $email, string $password):bool|array
+    function verifyUserLoginPassword(PDO $pdo, string $email, string $password)
 {
     $query = $pdo->prepare("SELECT * FROM users WHERE email = :email");
     $query->bindValue(':email', $email, PDO::PARAM_STR);
@@ -12,12 +12,15 @@ try{
 
     if ($user && password_verify($password, $user['password'])) {
         // verif ok
-        return $user;} else {
-            echo "Identifiants incorrects";
-        }}}
+        return $user;}}}
 catch (PDOException $e){
     echo "Erreur de connexion à la base de données : ". $e->getMessage();
 }
+
+
+
+
+
 
 
 

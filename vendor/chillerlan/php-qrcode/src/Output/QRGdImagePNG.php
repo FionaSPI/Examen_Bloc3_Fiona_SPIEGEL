@@ -21,7 +21,7 @@ use function imagepng, max, min;
  */
 class QRGdImagePNG extends QRGdImage{
 
-	public const MIME_TYPE = 'image/png';
+	final public const MIME_TYPE = 'image/png';
 
 	/**
 	 * @inheritDoc

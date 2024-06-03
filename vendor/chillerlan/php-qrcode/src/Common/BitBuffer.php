@@ -42,8 +42,6 @@ final class BitBuffer{
 
 	/**
 	 * BitBuffer constructor.
-	 *
-	 * @param int[] $bytes
 	 */
 	public function __construct(array $bytes = []){
 		$this->buffer = $bytes;

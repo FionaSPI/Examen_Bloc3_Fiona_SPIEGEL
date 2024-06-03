@@ -14,10 +14,11 @@
 
 namespace chillerlan\QRCode;
 
-use chillerlan\QRCode\Output\QROutputInterface;
 use chillerlan\QRCode\Common\{EccLevel, MaskPattern, Version};
-use function extension_loaded, in_array, max, min, strtolower;
-use const JSON_THROW_ON_ERROR, PHP_EOL;
+use chillerlan\QRCode\Output\QRMarkupSVG;
+use function constant, in_array, is_string, max, min, sprintf, strtolower, strtoupper, trim;
+use const JSON_THROW_ON_ERROR, JSON_UNESCAPED_SLASHES, PHP_EOL;
+
 
 /**
  * The QRCode plug-in settings & setter functionality
@@ -54,14 +55,15 @@ trait QROptionsTrait{
 	/**
 	 * Error correct level
 	 *
-	 * `EccLevel::X` where `X` is:
+	 * the constant `EccLevel::X` where `X` is:
 	 *
 	 * - `L` =>  7% (default)
 	 * - `M` => 15%
 	 * - `Q` => 25%
 	 * - `H` => 30%
 	 *
-	 * @todo: accept string values (PHP8+)
+	 * alternatively you can just pass the letters L/M/Q/H (case-insensitive) to the magic setter
+	 *
 	 * @see \chillerlan\QRCode\Common\EccLevel
 	 * @see https://github.com/chillerlan/php-qrcode/discussions/160
 	 */
@@ -96,44 +98,9 @@ trait QROptionsTrait{
 	 */
 
 	/**
-	 * The built-in output type
-	 *
-	 * - `QROutputInterface::MARKUP_SVG` (default)
-	 * - `QROutputInterface::MARKUP_HTML`
-	 * - `QROutputInterface::GDIMAGE_BMP`
-	 * - `QROutputInterface::GDIMAGE_GIF`
-	 * - `QROutputInterface::GDIMAGE_JPG`
-	 * - `QROutputInterface::GDIMAGE_PNG`
-	 * - `QROutputInterface::GDIMAGE_WEBP`
-	 * - `QROutputInterface::STRING_TEXT`
-	 * - `QROutputInterface::STRING_JSON`
-	 * - `QROutputInterface::IMAGICK`
-	 * - `QROutputInterface::EPS`
-	 * - `QROutputInterface::FPDF`
-	 * - `QROutputInterface::CUSTOM`
-	 *
-	 * @see \chillerlan\QRCode\Output\QREps
-	 * @see \chillerlan\QRCode\Output\QRFpdf
-	 * @see \chillerlan\QRCode\Output\QRGdImage
-	 * @see \chillerlan\QRCode\Output\QRImagick
-	 * @see \chillerlan\QRCode\Output\QRMarkupHTML
-	 * @see \chillerlan\QRCode\Output\QRMarkupSVG
-	 * @see \chillerlan\QRCode\Output\QRString
-	 * @see https://github.com/chillerlan/php-qrcode/issues/223
-	 *
-	 * @deprecated 5.0.0 see issue #223
+	 * The FQCN of the `QROutputInterface` to use
 	 */
-	protected string $outputType = QROutputInterface::MARKUP_SVG;
-
-	/**
-	 * The FQCN of the custom `QROutputInterface`
-	 *
-	 * if `QROptions::$outputType` is set to `QROutputInterface::CUSTOM` (default: `null`)
-	 *
-	 * @deprecated 5.0.0 the nullable type will be removed in future versions
-	 *                   and the default value will be set to `QRMarkupSVG::class`
-	 */
-	protected ?string $outputInterface = null;
+	protected string $outputInterface = QRMarkupSVG::class;
 
 	/**
 	 * Return the image resource instead of a render if applicable.
@@ -186,10 +153,8 @@ trait QROptionsTrait{
 	 * - `QRImagick`: defaults to `"white"`
 	 * - `QRGdImage`: defaults to `[255, 255, 255]`
 	 * - `QRFpdf`: defaults to blank internally (white page)
-	 *
-	 * @var mixed|null
 	 */
-	protected $bgColor = null;
+	protected mixed $bgColor = null;
 
 	/**
 	 * Whether to invert the matrix (reflectance reversal)
@@ -335,7 +300,7 @@ trait QROptionsTrait{
 	 *
 	 * @var mixed|null
 	 */
-	protected $transparencyColor = null;
+	protected mixed $transparencyColor = null;
 
 	/**
 	 * Compression quality
@@ -444,12 +409,7 @@ trait QROptionsTrait{
 	 *
 	 * @see https://www.php.net/manual/json.constants.php
 	 */
-	protected int $jsonFlags = JSON_THROW_ON_ERROR;
-
-	/**
-	 * Whether to return matrix values in JSON as booleans or `$M_TYPE` integers
-	 */
-	protected bool $jsonAsBooleans = false;
+	protected int $jsonFlags = JSON_THROW_ON_ERROR|JSON_UNESCAPED_SLASHES;
 
 	/*
 	 * QRFpdf settings
@@ -462,32 +422,16 @@ trait QROptionsTrait{
 	 */
 	protected string $fpdfMeasureUnit = 'pt';
 
-
 	/*
-	 * QR Code reader settings
+	 * QRMarkupXML settings
 	 */
 
 	/**
-	 * Use Imagick (if available) when reading QR Codes
-	 */
-	protected bool $readerUseImagickIfAvailable = false;
-
-	/**
-	 * Grayscale the image before reading
-	 */
-	protected bool $readerGrayscale = false;
-
-	/**
-	 * Invert the colors of the image
-	 */
-	protected bool $readerInvertColors = false;
-
-	/**
-	 * Increase the contrast before reading
+	 * Sets an optional XSLT stylesheet in the XML output
 	 *
-	 * note that applying contrast works different in GD and Imagick, so mileage may vary
+	 * @see https://developer.mozilla.org/en-US/docs/Web/XSLT
 	 */
-	protected bool $readerIncreaseContrast = false;
+	protected ?string $xmlStylesheet = null;
 
 
 	/**
@@ -523,6 +467,32 @@ trait QROptionsTrait{
 	}
 
 	/**
+	 * sets the ECC level
+	 *
+	 * @throws \chillerlan\QRCode\QRCodeException
+	 */
+	protected function set_eccLevel(int|string $eccLevel):void{
+
+		if(is_string($eccLevel)){
+			$ecc = strtoupper(trim($eccLevel));
+
+			if(!in_array($ecc, ['L', 'M', 'Q', 'H'])){
+				throw new QRCodeException(sprintf('Invalid ECC level: "%s"', $ecc));
+			}
+
+			// @todo: PHP 8.3+
+			// $eccLevel = EccLevel::{$ecc};
+			$eccLevel = constant(EccLevel::class.'::'.$ecc);
+		}
+
+		if((0b11 & $eccLevel) !== $eccLevel){
+			throw new QRCodeException(sprintf('Invalid ECC level: "%s"', $eccLevel));
+		}
+
+		$this->eccLevel = $eccLevel;
+	}
+
+	/**
 	 * sets/clamps the quiet zone size
 	 */
 	protected function set_quietzoneSize(int $quietzoneSize):void{
@@ -542,13 +512,6 @@ trait QROptionsTrait{
 		}
 
 		// @todo throw or ignore silently?
-	}
-
-	/**
-	 * enables Imagick for the QR Code reader if the extension is available
-	 */
-	protected function set_readerUseImagickIfAvailable(bool $useImagickIfAvailable):void{
-		$this->readerUseImagickIfAvailable = ($useImagickIfAvailable && extension_loaded('imagick'));
 	}
 
 	/**
@@ -596,134 +559,6 @@ trait QROptionsTrait{
 	 */
 	protected function set_circleRadius(float $circleRadius):void{
 		$this->circleRadius = max(0.1, min(0.75, $circleRadius));
-	}
-
-	/*
-	 * redirect calls of deprecated variables to new/renamed property
-	 */
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$outputBase64 instead
-	 * @see        \chillerlan\QRCode\QROptions::$outputBase64
-	 */
-	protected bool $imageBase64;
-
-	/**
-	 * redirect call to the new variable
-	 *
-	 * @deprecated 5.0.0 use QROptions::$outputBase64 instead
-	 * @see        \chillerlan\QRCode\QROptions::$outputBase64
-	 * @codeCoverageIgnore
-	 */
-	protected function set_imageBase64(bool $imageBase64):void{
-		$this->outputBase64 = $imageBase64;
-	}
-
-	/**
-	 * redirect call to the new variable
-	 *
-	 * @deprecated 5.0.0 use QROptions::$outputBase64 instead
-	 * @see        \chillerlan\QRCode\QROptions::$outputBase64
-	 * @codeCoverageIgnore
-	 */
-	protected function get_imageBase64():bool{
-		return $this->outputBase64;
-	}
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$quality instead
-	 * @see        \chillerlan\QRCode\QROptions::$quality
-	 */
-	protected int $jpegQuality;
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$quality instead
-	 * @see        \chillerlan\QRCode\QROptions::$quality
-	 * @codeCoverageIgnore
-	 */
-	protected function set_jpegQuality(int $jpegQuality):void{
-		$this->quality = $jpegQuality;
-	}
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$quality instead
-	 * @see        \chillerlan\QRCode\QROptions::$quality
-	 * @codeCoverageIgnore
-	 */
-	protected function get_jpegQuality():int{
-		return $this->quality;
-	}
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$quality instead
-	 * @see        \chillerlan\QRCode\QROptions::$quality
-	 */
-	protected int $pngCompression;
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$quality instead
-	 * @see        \chillerlan\QRCode\QROptions::$quality
-	 * @codeCoverageIgnore
-	 */
-	protected function set_pngCompression(int $pngCompression):void{
-		$this->quality = $pngCompression;
-	}
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$quality instead
-	 * @see        \chillerlan\QRCode\QROptions::$quality
-	 * @codeCoverageIgnore
-	 */
-	protected function get_pngCompression():int{
-		return $this->quality;
-	}
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$transparencyColor instead
-	 * @see        \chillerlan\QRCode\QROptions::$transparencyColor
-	 */
-	protected array $imageTransparencyBG;
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$transparencyColor instead
-	 * @see        \chillerlan\QRCode\QROptions::$transparencyColor
-	 * @codeCoverageIgnore
-	 */
-	protected function set_imageTransparencyBG(?array $imageTransparencyBG):void{
-		$this->transparencyColor = $imageTransparencyBG;
-	}
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$transparencyColor instead
-	 * @see        \chillerlan\QRCode\QROptions::$transparencyColor
-	 * @codeCoverageIgnore
-	 */
-	protected function get_imageTransparencyBG():?array{
-		return $this->transparencyColor;
-	}
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$bgColor instead
-	 * @see        \chillerlan\QRCode\QROptions::$bgColor
-	 */
-	protected string $imagickBG;
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$bgColor instead
-	 * @see        \chillerlan\QRCode\QROptions::$bgColor
-	 * @codeCoverageIgnore
-	 */
-	protected function set_imagickBG(?string $imagickBG):void{
-		$this->bgColor = $imagickBG;
-	}
-
-	/**
-	 * @deprecated 5.0.0 use QROptions::$bgColor instead
-	 * @see        \chillerlan\QRCode\QROptions::$bgColor
-	 * @codeCoverageIgnore
-	 */
-	protected function get_imagickBG():?string{
-		return $this->bgColor;
 	}
 
 }

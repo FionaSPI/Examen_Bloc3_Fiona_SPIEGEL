@@ -21,7 +21,7 @@ use function imagewebp, max, min;
  */
 class QRGdImageWEBP extends QRGdImage{
 
-	public const MIME_TYPE = 'image/webp';
+	final public const MIME_TYPE = 'image/webp';
 
 	/**
 	 * @inheritDoc
