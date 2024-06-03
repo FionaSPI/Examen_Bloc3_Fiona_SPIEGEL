@@ -38,7 +38,7 @@
 
             //Vérifier que l'email de l’utilisateur existe
             if($stmt->rowCount() > 0){
-                die("Cette adresse email est déjà utilisée");
+                $errors[] ="Cette adresse email est déjà utilisée.";
             }
 
             // Hashage(encryptage)
@@ -46,16 +46,20 @@
 
             //Insérer les données dans la base 
             $insertQuery = "INSERT INTO users ( name, surname, email, tel_user, password) VALUES (:name, :surname, :email, :tel_num_users, :password)";
-            $stmt = $pdo->prepare($insertQuery);
-            $stmt->bindParam(':name', $nameForm);
-            $stmt->bindParam(':surname', $surnameForm);
-            $stmt->bindParam(':email', $emailForm);
-            $stmt->bindParam(':tel_num_users', $telForm);
-            $stmt->bindParam(':password', $hashedPassword);
-            $stmt->execute();
-
+            $stamt = $pdo->prepare($insertQuery);
+            $stamt->bindParam(':name', $nameForm);
+            $stamt->bindParam(':surname', $surnameForm);
+            $stamt->bindParam(':email', $emailForm);
+            $stamt->bindParam(':tel_num_users', $telForm);
+            $stamt->bindParam(':password', $hashedPassword);
+            $stamt->execute();
+            if($stamt->rowCount() > 0){
+                $errors[] ="Cette adresse email est déjà utilisée.";
+            }
             
             $user = verifyUserLoginPassword($pdo, $_POST['email'], $_POST['password']);
+            
+        
 
             if ($user) {
                 // on va le connecter => session
@@ -64,8 +68,8 @@
             } else {
                    // afficher une erreur
                 $errors[] = "Email ou mot de passe incorrect";
-            }
-        }
+            }}
+        
         
         
         
@@ -84,6 +88,14 @@
                 <h1 class="pt-5 d-flex justify-content-center">Insription</h1>
 
                 <!--------------------------------------- FORMULAIRE D'INSCRIPTION --------------------------------------->
+                
+                 <?php
+                foreach ($errors as $error) { ?>
+                <div class="alert alert-danger" role="alert">
+                    <?=$error; ?>
+                </div>
+                <?php }
+                ?>
 
                 <form action="" method="POST" class="col-sm-10 col-md-8 col-lg-8 mx-auto py-5">
                     <div class="mb-3">

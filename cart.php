@@ -17,7 +17,7 @@
     <!---------------------------------------------------- HEADER ---------------------------------------------------->
     <header class="bg-white">
         <?php
-        include_once __DIR__. '/templates/header.php';
+        require_once __DIR__. '/templates/header.php';
         require_once 'lib/offers.php';
         require_once "lib/pdo.php";
         require_once "lib/user.php";
@@ -34,7 +34,7 @@
 
         <hr class="w-75 mx-auto">
 
-        <form action="downloadTicket.php" method="post">
+        <form action="genpdf.php" method="post">
 
             <?php 
             $choiceForm = $_POST['choice'];
@@ -47,14 +47,14 @@
 
             <div class="w-75 mx-auto d-flex justify-content-between align-items-center">
                 <div class="row text-center align-items-center">
-                    <img class="col-md-4" src="assets/images/tickets.png" style="width:300px" alt="Illustration numérique, 
+                    <img class="col-lg-4 col-md-4 col-sm-12 mx-auto" src="assets/images/tickets.png" style="width:300px" alt="Illustration numérique, 
                         de 2 tickets, avec le logo des JO Paris 2024 et un faux QR Code, 
                         qui se chevauchent, celui du dessus est noir et celui du-dessous est jaune.">
 
-                    <div class="col-md-4 display-5">1 offre <?php echo $result['offer_name']?> </div>
-                    <label class="col-md-3" for='tickets' style="font-size : 1.5rem">Nombre(s) de ticket(s) :</label>
+                    <div class="col-lg-4 col-md-12 col-sm-12 display-5 mb-3">1 offre <?php echo $result['offer_name']?> </div>
+                    <label class="col-lg-3 col-md-10 col-sm-10 mx-auto" for='tickets' style="font-size : 1.5rem">Nombre(s) de ticket(s) :</label>
                     <input type="number" name="tickets" id="tickets" style="font-size : 1.5rem" type="number" readonly
-                        class="col-md-1 text-center" value="<?php echo $result['tickets_num']?>"></input>
+                        class="col-lg-1 col-md-2 col-sm-2 mx-auto text-center" value="<?php echo $result['tickets_num']?>"></input>
                 </div>
             </div>
 
@@ -80,9 +80,38 @@
                         </label>
                     </div>
                 </div>
+                
+                <!-- Button trigger modal -->
 
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">Statut du paiement</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-center h3">
+        Paiement accepté !
+      </div>
+      <div class="modal-footer">
+          <button class="btn btn-info text-white" type="submit" name="pay" value="Télécharger le ticket">Télécharger le ticket</button>
+        <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+                
+                
+                
+                
+              
                 <div class="d-flex justify-content-center mt-5">
-                    <button class="btn btn-success" type="submit" name="pay" value="Payer">Payer</button>
+                 
+                 <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#exampleModal">
+  Payer
+</button>
                 </div>
                 <?php }}?>
         </form>
